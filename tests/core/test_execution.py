@@ -96,3 +96,18 @@ def test_crash_mid_run_is_marked_failed_on_restart(engine, db_url):
     item = approvals.get(aid)
     assert item["status"] == "failed" and item["error"] == "interrupted — check manually"
     assert approvals.run_approved() == 0
+
+
+@executor("test.datetime_result")
+def _datetime_result(payload: dict) -> dict:
+    from datetime import UTC, datetime
+
+    return {"placed_at": datetime(2026, 1, 2, tzinfo=UTC)}
+
+
+def test_result_json_cannot_encode_is_still_saved(engine):
+    aid = _approved("test.datetime_result")
+    assert approvals.run_approved() == 1
+    item = approvals.get(aid)
+    assert item["status"] == "executed"
+    assert item["result"] == {"placed_at": "2026-01-02 00:00:00+00:00"}

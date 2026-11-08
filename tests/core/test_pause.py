@@ -42,3 +42,21 @@ def test_cli_pause_and_resume(engine, db_url, capsys):
     assert pause.is_paused() and "paused" in capsys.readouterr().out
     run(["resume"], db_url=db_url)
     assert not pause.is_paused() and "running" in capsys.readouterr().out
+
+
+@executor("test.pauses_mid_batch")
+def _pauses(payload: dict) -> dict:
+    ran.append(payload)
+    pause.set_paused(True)  # owner hits Pause while the batch is running
+    return {}
+
+
+def test_pause_mid_batch_stops_the_rest(engine):
+    pause.set_paused(False)
+    first = approvals.propose("test.pauses_mid_batch", "x", {})
+    second = approvals.propose("test.pausable", "y", {})
+    approvals.approve(first)
+    approvals.approve(second)
+    assert approvals.run_approved() == 1
+    assert approvals.get(second)["status"] == "approved"
+    pause.set_paused(False)

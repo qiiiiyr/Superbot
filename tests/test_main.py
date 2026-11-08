@@ -44,6 +44,10 @@ def _free_port() -> int:
 def test_port_in_use_gives_one_line_error(engine, db_url, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test")
+    aid = approvals.propose("test.main_stuck", "x", {})
+    approvals.approve(aid)
+    with engine.begin() as c:  # the first bot is running this right now
+        c.execute(text("UPDATE actions SET status='executing' WHERE id=:i"), {"i": aid})
     with socket.socket() as busy:
         busy.bind(("127.0.0.1", 0))
         busy.listen()
@@ -51,3 +55,4 @@ def test_port_in_use_gives_one_line_error(engine, db_url, tmp_path, monkeypatch)
         with pytest.raises(SystemExit, match="DASHBOARD_PORT"):
             run([], db_url=db_url, stop=threading.Event())
     assert not scheduler.is_running()
+    assert approvals.get(aid)["status"] == "executing"  # second start must not touch it

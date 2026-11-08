@@ -128,11 +128,14 @@ def expire_old(hours: int) -> int:
 def _finish(action_id: int, status: str, result: dict | None, error: str | None) -> None:
     with db.engine().begin() as c:
         c.execute(
-            text("UPDATE actions SET status=:s, executed_at=:t, result=:r, error=:e WHERE id=:i"),
+            text(
+                "UPDATE actions SET status=:s, executed_at=:t, result=:r, error=:e"
+                " WHERE id=:i AND status='executing'"
+            ),
             {
                 "s": status,
                 "t": _now(),
-                "r": None if result is None else json.dumps(result),
+                "r": None if result is None else json.dumps(result, default=str),
                 "e": error,
                 "i": action_id,
             },
@@ -142,14 +145,14 @@ def _finish(action_id: int, status: str, result: dict | None, error: str | None)
 
 def run_approved() -> int:
     """Run every approved action at most once. Returns how many this call ran."""
-    if pause.is_paused():
-        return 0
     with db.engine().connect() as c:
         rows = c.execute(
             text("SELECT id, kind, payload FROM actions WHERE status='approved' ORDER BY id")
         ).all()
     ran = 0
     for action_id, kind, payload in rows:
+        if pause.is_paused():
+            break
         # The claim is the only double-run guard: one atomic UPDATE, no prior read in this txn.
         with db.engine().begin() as c:
             if (

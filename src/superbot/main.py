@@ -56,10 +56,11 @@ def run(
     db.migrate(db_url)
     db.use(db_url)
     pause.force(settings.paused)
+    llm.configure(settings)
+    # port bind doubles as a single-instance lock: a second copy exits here
+    server, thread = _serve(settings)
     if n := approvals.recover_interrupted():
         log.warning("%d action(s) were cut off mid-run and marked failed — check them manually", n)
-    llm.configure(settings)
-    server, thread = _serve(settings)
     scheduler.start(settings)
     log.info(
         "ready%s — open http://127.0.0.1:%d",
