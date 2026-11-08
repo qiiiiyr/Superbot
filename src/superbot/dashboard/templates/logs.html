@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Logs{% endblock %}
+{% block content %}
+<h1>Logs</h1>
+{% if lines is none %}
+<p>No log yet. It appears once the bot has started.</p>
+{% else %}
+<p>The last {{ lines | length }} lines, newest at the bottom. Full log: <code>data\logs\superbot.log</code></p>
+<pre class="log" tabindex="0" aria-label="Log lines">{{ lines | join("") }}</pre>
+{% endif %}
+{% endblock %}

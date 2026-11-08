@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+{% block content %}
+<h1>History</h1>
+<p>The last 50 actions, newest first.</p>
+{% if items %}
+<table>
+  <thead><tr><th scope="col">What</th><th scope="col">Status</th><th scope="col">Outcome</th></tr></thead>
+  <tbody>
+  {% for a in items %}
+  {% set interrupted = a.error and "interrupted" in a.error %}
+  <tr{% if interrupted %} class="interrupted"{% endif %}>
+    <td>{{ a.title }}<br><small>{{ a.kind }}</small></td>
+    <td>{% if interrupted %}<strong>Interrupted, check manually</strong>{% else %}{{ a.status }}{% endif %}</td>
+    <td>{% if a.error %}{{ a.error }}{% elif a.result %}{{ a.result | tojson }}{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Nothing has happened yet.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Approvals{% endblock %}
+{% block content %}
+<h1>Waiting for your approval</h1>
+{% for a in items %}
+<article class="action">
+  <h2>{{ a.title }}</h2>
+  <p class="meta">{{ a.kind }} · {{ a.expires }}</p>
+  <table>
+    <caption class="visually-hidden">Details</caption>
+    {% for key, value in a.details %}
+    <tr><th scope="row">{{ key }}</th><td>{{ value }}</td></tr>
+    {% endfor %}
+  </table>
+  <div class="buttons">
+    <form method="post" action="/actions/{{ a.id }}/approve">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button type="submit" aria-label="Approve: {{ a.title }}">Approve</button>
+    </form>
+    <form method="post" action="/actions/{{ a.id }}/reject">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button type="submit" class="secondary" aria-label="Reject: {{ a.title }}">Reject</button>
+    </form>
+  </div>
+</article>
+{% else %}
+<p>Nothing is waiting for you.</p>
+{% endfor %}
+{% endblock %}

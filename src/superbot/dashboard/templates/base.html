@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Superbot{% endblock %} · Superbot</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <nav aria-label="Main">
+    <ul>
+      <li class="brand">Superbot</li>
+      {% for href, label in [("/", "Approvals"), ("/history", "History"), ("/status", "Status"), ("/logs", "Logs")] %}
+      <li><a href="{{ href }}"{% if request.url.path == href %} aria-current="page"{% endif %}>{{ label }}</a></li>
+      {% endfor %}
+    </ul>
+  </nav>
+  <main>
+    {% if msg %}<p role="status" class="msg">{{ msg }}</p>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

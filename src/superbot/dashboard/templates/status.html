@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Status{% endblock %}
+{% block content %}
+<h1>Status</h1>
+<p>The bot is <strong>{{ "Paused" if paused else "Running" }}</strong>.</p>
+{% if forced %}
+<p>Paused by <code>PAUSED=true</code> in <code>.env</code>. To resume, change it to <code>false</code> and restart the bot.</p>
+{% endif %}
+<form method="post" action="{{ '/resume' if paused else '/pause' }}">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <button type="submit">{{ "Resume" if paused else "Pause everything" }}</button>
+</form>
+
+<h2>AI spending</h2>
+<p>{{ spend }}</p>
+
+<h2>Background jobs</h2>
+{% if not scheduler_running %}<p>Background jobs are not running.</p>{% endif %}
+<table>
+  <thead><tr><th scope="col">Job</th><th scope="col">Last run</th></tr></thead>
+  <tbody>
+  {% for name, when in jobs %}<tr><td>{{ name }}</td><td>{{ when }}</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}
