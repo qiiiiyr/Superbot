@@ -5,6 +5,7 @@ import time
 
 import uvicorn
 
+from superbot import research
 from superbot.core import approvals, db, llm, pause, scheduler
 from superbot.core.config import Settings, load_settings
 from superbot.core.log import setup_logging
@@ -52,7 +53,12 @@ def run(
         print("superbot is now", "paused" if argv[0] == "pause" else "running")
         return
     settings = load_settings()
-    setup_logging(secrets=[settings.anthropic_api_key.get_secret_value()])
+    setup_logging(
+        secrets=[
+            settings.anthropic_api_key.get_secret_value(),
+            settings.cj_api_key.get_secret_value(),
+        ]
+    )
     db.migrate(db_url)
     db.use(db_url)
     pause.force(settings.paused)
@@ -62,6 +68,7 @@ def run(
     if n := approvals.recover_interrupted():
         log.warning("%d action(s) were cut off mid-run and marked failed — check them manually", n)
     scheduler.start(settings)
+    research.register(settings)
     log.info(
         "ready%s — open http://127.0.0.1:%d",
         " (paused)" if pause.is_paused() else "",

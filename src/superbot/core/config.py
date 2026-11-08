@@ -12,6 +12,14 @@ class Settings(BaseSettings):
     quality_model: str = "claude-sonnet-5-5"
     paused: bool = False
     dashboard_port: int = 8000
+    # research (all optional; research is skipped without a CJ key)
+    cj_api_key: SecretStr = SecretStr("")
+    research_keywords: str = ""  # comma-separated; empty = Claude picks
+    research_daily_limit: int = 5
+    price_multiplier: float = 2.5
+    min_profit_cents: int = 1000
+    max_ship_days: int = 15
+    research_hour: int = 9
 
 
 def load_settings() -> Settings:

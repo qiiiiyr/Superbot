@@ -10,7 +10,7 @@
   <nav aria-label="Main">
     <ul>
       <li class="brand">Superbot</li>
-      {% for href, label in [("/", "Approvals"), ("/history", "History"), ("/status", "Status"), ("/logs", "Logs")] %}
+      {% for href, label in [("/", "Approvals"), ("/products", "Products"), ("/history", "History"), ("/status", "Status"), ("/logs", "Logs")] %}
       <li><a href="{{ href }}"{% if request.url.path == href %} aria-current="page"{% endif %}>{{ label }}</a></li>
       {% endfor %}
     </ul>

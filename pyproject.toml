@@ -13,6 +13,7 @@ dependencies = [
     "uvicorn>=0.54.0",
     "jinja2>=3.1.6",
     "python-multipart>=0.0.33",
+    "httpx>=0.28.1",
 ]
 
 [project.scripts]
@@ -20,7 +21,6 @@ superbot = "superbot.main:run"
 
 [dependency-groups]
 dev = [
-    "httpx>=0.28.1",
     "pytest>=8",
     "pytest-cov>=5",
     "ruff>=0.6",

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Products{% endblock %}
+{% block content %}
+<h1>Shortlisted products</h1>
+<p>Products you approved from research, newest first. The listings module will put these on your store.</p>
+{% for p in items %}
+<article class="action">
+  <h2>{{ p.name }}</h2>
+  {% if p.image %}<img class="product" src="{{ p.image }}" alt="{{ p.name }}" loading="lazy">{% endif %}
+  <table>
+    <caption class="visually-hidden">Numbers for {{ p.name }}</caption>
+    <tr><th scope="row">CJ cost</th><td>{{ dollars(p.cost_cents) }}</td></tr>
+    <tr><th scope="row">Shipping</th><td>{{ dollars(p.ship_cents) }} ({{ p.ship_method }}, up to {{ p.ship_days }} days)</td></tr>
+    <tr><th scope="row">Sell price</th><td>{{ dollars(p.sell_cents) }}</td></tr>
+    <tr><th scope="row">Profit per sale</th><td>{{ dollars(p.profit_cents) }}</td></tr>
+    <tr><th scope="row">Score</th><td>{{ p.score }}/10. {{ p.reason }}</td></tr>
+    <tr><th scope="row">CJ product id</th><td><code>{{ p.cj_pid }}</code></td></tr>
+  </table>
+</article>
+{% else %}
+<p>No products yet. Approve a suggestion from research and it shows up here.</p>
+{% endfor %}
+{% endblock %}

@@ -6,6 +6,7 @@
 <article class="action">
   <h2>{{ a.title }}</h2>
   <p class="meta">{{ a.kind }} · {{ a.expires }}</p>
+  {% if a.image %}<img class="product" src="{{ a.image }}" alt="{{ a.payload.Product or a.title }}" loading="lazy">{% endif %}
   <table>
     <caption class="visually-hidden">Details</caption>
     {% for key, value in a.details %}

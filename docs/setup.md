@@ -79,12 +79,41 @@ uv run superbot resume
 
 While paused you can still approve or reject things, but nothing runs until you resume. You can also put `PAUSED=true` in `.env` to keep the bot paused every time it starts.
 
+## 9. Turn on product research (optional, free)
+
+The bot can look for products on CJ Dropshipping once a day and suggest the ones that would make a profit. It needs a free CJ account.
+
+1. Make a free account at [cjdropshipping.com](https://cjdropshipping.com).
+2. Get your API key. CJ's own steps are at [How to Get API Key](https://developers.cjdropshipping.com/en/api/start/apikey.html). The key looks like `CJ1234567@api@abcdef...`.
+3. Open `.env` and add this line with your key:
+
+   ```
+   CJ_API_KEY=your-key-here
+   ```
+
+4. Stop the bot (Ctrl+C) and start it again with `uv run superbot`. The log says `research: finds products daily at 09:00`.
+
+Every day at 9:00 (your PC's time), suggestions appear on the **Approvals** page. Each one shows the product picture, what CJ charges, shipping cost and days, the sell price, and your profit per sale after card fees. **Approve** adds it to the **Products** page, and the listings module will put those products on your store later. **Reject** means you won't see it again.
+
+Research never buys or publishes anything. It uses a little of your Claude budget, a few cents per run.
+
+You can change these in `.env`:
+
+| Setting | Default | What it does |
+|---|---|---|
+| `RESEARCH_HOUR` | `9` | Hour of the day it runs (0–23) |
+| `RESEARCH_DAILY_LIMIT` | `5` | Most suggestions per day |
+| `PRICE_MULTIPLIER` | `2.5` | Sell price = (CJ cost + shipping) × this, rounded up to .99 |
+| `MIN_PROFIT_CENTS` | `1000` | Skip products earning under $10 per sale |
+| `MAX_SHIP_DAYS` | `15` | Skip products that take longer to arrive |
+| `RESEARCH_KEYWORDS` | empty | Your own search words, comma-separated, e.g. `dog bowl, cat brush`. Empty lets Claude choose |
+
 ## Where things are
 
 | What | Where |
 |---|---|
 | Log of what the bot did | `data\logs\superbot.log` |
-| The bot's database (approvals, AI spending) | `data\superbot.db` |
+| The bot's database (approvals, AI spending, products) | `data\superbot.db` |
 | Your settings and keys | `.env` |
 
 If something failed mid-run (for example, the PC lost power), the bot marks it **failed — check manually** on the next start instead of trying again. Check it yourself (for example, whether the order was really placed) before doing anything else with it.

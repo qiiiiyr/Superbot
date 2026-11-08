@@ -15,6 +15,7 @@
 <p>{{ spend }}</p>
 
 <h2>Background jobs</h2>
+{% if not research_on %}<p>Product research is off. Add <code>CJ_API_KEY</code> to <code>.env</code> and restart to turn it on.</p>{% endif %}
 {% if not scheduler_running %}<p>Background jobs are not running.</p>{% endif %}
 <table>
   <thead><tr><th scope="col">Job</th><th scope="col">Last run</th></tr></thead>

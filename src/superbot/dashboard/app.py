@@ -16,6 +16,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from superbot.core import approvals, llm, pause, scheduler
 from superbot.core.approvals import ApprovalError
 from superbot.core.config import Settings
+from superbot.research import finder
 
 HERE = Path(__file__).parent
 templates = Jinja2Templates(directory=HERE / "templates")  # autoescapes .html
@@ -30,7 +31,11 @@ MESSAGES = {
     "forced": "Can't resume from here: PAUSED=true is set in .env. Change it to false and restart.",
 }
 
-JOB_NAMES = {"core.run_approved": "Run approved actions", "core.expire_old": "Expire old approvals"}
+JOB_NAMES = {
+    "core.run_approved": "Run approved actions",
+    "core.expire_old": "Expire old approvals",
+    "research.find": "Find products (daily)",
+}
 
 
 def dollars(cents: int) -> str:
@@ -43,11 +48,20 @@ def expires_in(created_at: str, hours: int) -> str:
     return f"expires in {whole}h" if whole >= 1 else "expires in under 1h"
 
 
+HIDDEN_KEYS = {"product_id", "image_url"}  # shown another way, or only for the bot
+
+
 def details(payload: dict) -> list[tuple[str, str]]:
     return [
         (k, v if isinstance(v, str) else json.dumps(v, ensure_ascii=False))
         for k, v in payload.items()
+        if k not in HIDDEN_KEYS
     ]
+
+
+def image(url) -> str | None:
+    """Only https images: no http mixed content, no data: or javascript: tricks."""
+    return url if isinstance(url, str) and url.startswith("https://") else None
 
 
 def check_post(request: Request, csrf: str = Form("")) -> None:
@@ -85,6 +99,7 @@ def create_app(settings: Settings, log_file: Path = Path("data/logs/superbot.log
             {
                 **a,
                 "details": details(a["payload"]),
+                "image": image(a["payload"].get("image_url")),
                 "expires": expires_in(a["created_at"], expiry_hours),
             }
             for a in approvals.list_pending()
@@ -103,6 +118,11 @@ def create_app(settings: Settings, log_file: Path = Path("data/logs/superbot.log
         except ApprovalError:
             return done("/", "not_pending")
         return done("/", "approved" if verb == "approve" else "rejected")
+
+    @app.get("/products")
+    def products(request: Request):
+        items = [p | {"image": image(p["image_url"])} for p in finder.shortlisted()]
+        return render(request, "products.html", items=items, dollars=dollars)
 
     @app.get("/history")
     def history(request: Request):
@@ -136,6 +156,7 @@ def create_app(settings: Settings, log_file: Path = Path("data/logs/superbot.log
             spend=spend + " this month",
             jobs=jobs,
             scheduler_running=scheduler.is_running(),
+            research_on=bool(settings.cj_api_key.get_secret_value()),
         )
 
     @app.post("/pause", dependencies=[Depends(check_post)])

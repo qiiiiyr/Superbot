@@ -547,6 +547,7 @@ dependencies = [
     { name = "anthropic" },
     { name = "apscheduler" },
     { name = "fastapi" },
+    { name = "httpx" },
     { name = "jinja2" },
     { name = "pydantic-settings" },
     { name = "python-multipart" },
@@ -556,7 +557,6 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "httpx" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
@@ -568,6 +568,7 @@ requires-dist = [
     { name = "anthropic" },
     { name = "apscheduler", specifier = ">=3.10,<4" },
     { name = "fastapi", specifier = ">=0.162.2" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "pydantic-settings", specifier = ">=2,<3" },
     { name = "python-multipart", specifier = ">=0.0.33" },
@@ -577,7 +578,6 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "httpx", specifier = ">=0.28.1" },
     { name = "pytest", specifier = ">=8" },
     { name = "pytest-cov", specifier = ">=5" },
     { name = "ruff", specifier = ">=0.6" },

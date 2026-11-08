@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from functools import partial
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from tzlocal import get_localzone
 
 from superbot.core import approvals, pause
 from superbot.core.config import Settings
@@ -29,12 +30,23 @@ def guarded(fn: Callable[[], object], name: str) -> Callable[[], None]:
     return run
 
 
-def add_job(fn: Callable[[], object], *, job_id: str, seconds: int = 0, minutes: int = 0) -> None:
+def add_job(
+    fn: Callable[[], object],
+    *,
+    job_id: str,
+    seconds: int = 0,
+    minutes: int = 0,
+    hour: int | None = None,
+) -> None:
+    """Every N seconds/minutes, or once a day at `hour` in the PC's own time zone."""
+    when = (
+        {"trigger": "cron", "hour": hour, "minute": 0, "timezone": get_localzone()}
+        if hour is not None
+        else {"trigger": "interval", "seconds": seconds, "minutes": minutes}
+    )
     _sched().add_job(
         guarded(fn, job_id),
-        "interval",
-        seconds=seconds,
-        minutes=minutes,
+        **when,
         id=job_id,
         name=job_id,
         replace_existing=True,
